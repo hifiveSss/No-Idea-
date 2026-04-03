@@ -1,8 +1,57 @@
 [gd_scene format=3 uid="uid://dxfe0vymtdrd8"]
 
-[sub_resource type="BoxMesh" id="BoxMesh_mwb40"]
+[ext_resource type="WhisperResource" uid="uid://lnvtev0wr2ay" path="res://addons/godot_whisper/models/gglm-tiny.en.bin" id="2_fc0e3"]
+[ext_resource type="Script" uid="uid://cgetdq3cdidin" path="res://addons/godot_whisper/capture_stream_to_text.gd" id="2_feb5d"]
+[ext_resource type="Script" uid="uid://bhild6doecf5u" path="res://addons/godot_whisper/label_transcribe.gd" id="4_7jktm"]
+[ext_resource type="PackedScene" uid="uid://bjiiao7duuuw4" path="res://player.tscn" id="4_fc0e3"]
+[ext_resource type="Script" uid="uid://cixhyoscelevf" path="res://mic_input.gd" id="4_ryrav"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_fc0e3"]
+sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+
+[sub_resource type="Sky" id="Sky_7jktm"]
+sky_material = SubResource("ProceduralSkyMaterial_fc0e3")
+
+[sub_resource type="Environment" id="Environment_ryrav"]
+background_mode = 2
+sky = SubResource("Sky_7jktm")
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="AudioStreamMicrophone" id="AudioStreamMicrophone_fc0e3"]
 
 [node name="Game" type="Node3D" unique_id=266071725]
 
-[node name="Nig" type="MeshInstance3D" parent="." unique_id=1665114991]
-mesh = SubResource("BoxMesh_mwb40")
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1861327508]
+environment = SubResource("Environment_ryrav")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1649992635]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
+shadow_enabled = true
+
+[node name="SpeechToText" type="SpeechToText" parent="." unique_id=1223334723]
+language_model = ExtResource("2_fc0e3")
+script = ExtResource("2_feb5d")
+
+[node name="RichTextLabel" type="RichTextLabel" parent="." unique_id=724597752]
+offset_left = 144.0
+offset_top = 92.0
+offset_right = 184.0
+offset_bottom = 132.0
+script = ExtResource("4_7jktm")
+
+[node name="mic_input" type="AudioStreamPlayer" parent="." unique_id=166728435]
+stream = SubResource("AudioStreamMicrophone_fc0e3")
+bus = &"Record"
+script = ExtResource("4_ryrav")
+
+[node name="Player" parent="." unique_id=380037083 instance=ExtResource("4_fc0e3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.240952, 2.193382, 1.5146432)
+
+[node name="CSGBox3D" type="CSGBox3D" parent="." unique_id=165683902]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9177246, -0.46533203, -0.23895264)
+use_collision = true
+size = Vector3(16.712402, 0.06933594, 18.697144)
+
+[connection signal="transcribed_msg" from="SpeechToText" to="RichTextLabel" method="_on_speech_to_text_transcribed_msg"]
